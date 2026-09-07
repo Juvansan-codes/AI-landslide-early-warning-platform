@@ -16,6 +16,7 @@ Every AI assistant working on this project **must** adhere to this protocol:
 ## 📑 Table of Contents
 - [Entry 001: Project Initialization & Journaling System Setup](#entry-001--2026-09-07--project-initialization--journaling-system-setup)
 - [Entry 002: Initial Full-Stack Repository Scaffolding](#entry-002--2026-09-07--initial-full-stack-repository-scaffolding)
+- [Entry 003: Database Foundation (PostGIS & Supabase)](#entry-003--2026-09-07--database-foundation-postgis--supabase)
 
 ---
 
@@ -150,4 +151,65 @@ Every AI assistant working on this project **must** adhere to this protocol:
   - Design and implement PostGIS database schema (risk cells, landslide records, sensor data)
   - Begin data acquisition (historical landslide records, DEM/terrain data)
   - Implement GIS map view on the dashboard using MapLibre GL JS
+
+---
+
+### Entry 003 — 2026-09-07 — Database Foundation (PostGIS & Supabase)
+
+- **User Prompt**:
+  > *"Set up the project's Supabase PostgreSQL + PostGIS database foundation and create the initial schema required by the platform. Design schema around 9 major entities (Users, Locations, Risk Cells, Historical Landslides, Weather, Sensors, Risk Assessments, Citizen Reports, Alerts). Enable PostGIS with SRID 4326. Implement RLS. Do not implement application logic yet."*
+
+- **Objective**:
+  - Design database schema covering all required MVP entities.
+  - Choose appropriate spatial column types (`geometry` vs `geography`) and spatial indexes.
+  - Implement migration files for reproducible schema deployment.
+  - Implement Row Level Security (RLS) policies.
+  - Configure FastAPI to connect to Supabase (using `supabase-py`).
+  - Create extensive schema documentation (ER diagram + spatial rationale).
+
+- **AI Solution & Strategy**:
+  - **Spatial Design**: Adopted WGS 84 (SRID 4326) universally. Used `geography(Point)` for highly accurate point-distance calculations (sensors, reports, landslides, weather). Used `geometry(Polygon/Geometry)` for polygons and lines (risk cells, infrastructure) for faster spatial joins/containment. Created GiST indexes on all spatial columns.
+  - **Schema Architecture**: Created 11 core tables utilizing `UUID` primary keys and comprehensive `ENUM` types. Included `infrastructure_assets` to support future spatial impact analysis. Allowed resolution-agnostic `risk_cells` by storing actual polygons rather than hardcoded grid references.
+  - **Row Level Security (RLS)**: Enforced RLS universally. Polices restrict citizen report visibility to owners, while granting field officers/admins global view. The FastAPI backend connects using the **service role key**, explicitly bypassing RLS for system operations.
+  - **Backend Integration**: Implemented a lazy-loading database module (`app/core/database.py`) using `supabase-py` so the backend can start and pass tests even without a `.env` configuration. Added a dynamic database connectivity check to the `/api/v1/health` endpoint.
+  - **Verification**: Created a static SQL validation script (`tests/test_migrations.py`) to verify syntax, spatial column SRIDs, index existence, foreign key integrity, and RLS enforcement without requiring a live database connection.
+
+- **Files Created / Modified**:
+  - **Migrations**:
+    - [`backend/migrations/README.md`](file:///d:/College%20Files/SIH'26/backend/migrations/README.md) [NEW]: Migration strategy documentation.
+    - [`backend/migrations/001_enable_postgis.sql`](file:///d:/College%20Files/SIH'26/backend/migrations/001_enable_postgis.sql) [NEW]: Enables PostGIS and defines `updated_at` trigger.
+    - [`backend/migrations/002_core_schema.sql`](file:///d:/College%20Files/SIH'26/backend/migrations/002_core_schema.sql) [NEW]: 11 tables, 11 ENUMs, constraints, and RLS.
+  - **Backend Integration**:
+    - [`backend/app/core/database.py`](file:///d:/College%20Files/SIH'26/backend/app/core/database.py) [NEW]: Supabase service and user client factory.
+    - [`backend/app/core/__init__.py`](file:///d:/College%20Files/SIH'26/backend/app/core/__init__.py) [MODIFIED]: Exported DB utilities.
+    - [`backend/app/schemas/health.py`](file:///d:/College%20Files/SIH'26/backend/app/schemas/health.py) [MODIFIED]: Added optional database connectivity schema.
+    - [`backend/app/api/v1/endpoints/health.py`](file:///d:/College%20Files/SIH'26/backend/app/api/v1/endpoints/health.py) [MODIFIED]: Integrated database connectivity check.
+    - [`backend/requirements.txt`](file:///d:/College%20Files/SIH'26/backend/requirements.txt) [MODIFIED]: Added `supabase>=2.0`.
+  - **Testing & Docs**:
+    - [`backend/tests/test_migrations.py`](file:///d:/College%20Files/SIH'26/backend/tests/test_migrations.py) [NEW]: Static SQL schema validation script.
+    - [`docs/database.md`](file:///d:/College%20Files/SIH'26/docs/database.md) [NEW]: Extensive schema documentation, ER Diagram (Mermaid), spatial query examples.
+
+- **Verification Results**:
+  - ✅ Installed `supabase>=2.0` Python client successfully.
+  - ✅ `pytest tests/ -v` → 2/2 tests passed (Health check works normally, gracefully handling missing DB config).
+  - ✅ Executed `test_migrations.py` static analysis (with UTF-8 encoding fix):
+    - Confirmed 11 tables and 11 ENUMs exist.
+    - Confirmed 6 spatial columns use correct SRID (4326).
+    - Confirmed 6 GiST indexes applied.
+    - Confirmed 8 foreign keys point to valid tables.
+    - Confirmed RLS enabled on all 11 tables.
+  - *Note*: Live Supabase connectivity was intentionally not tested as a live project is not yet provisioned.
+
+- **Current Status**:
+  - Database schema is fully defined and documented.
+  - Migration scripts are ready to be run against a real Supabase instance.
+  - FastAPI backend is configured to securely connect to Supabase once credentials are provided in `.env`.
+
+- **Next Steps**:
+  - Create a live Supabase project.
+  - Apply migrations `001` and `002` via the Supabase SQL Editor.
+  - Configure `.env` with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+  - Validate live connectivity via backend health check endpoint.
+  - Begin data ingestion modules (e.g., historical landslide data loading).
+
 
