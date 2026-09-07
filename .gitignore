@@ -1,0 +1,91 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node.js
+node_modules/
+.next/
+out/
+.turbo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.vercel
+
+# ML artifacts (large trained models)
+ml/models/*.pkl
+ml/models/*.joblib
+ml/models/*.xgb
+ml/models/*.json
+!ml/models/README.md
+
+# GIS data (large raster/vector files)
+gis/data/*.tif
+gis/data/*.tiff
+gis/data/*.shp
+gis/data/*.shx
+gis/data/*.dbf
+gis/data/*.prj
+gis/data/*.geojson
+!gis/data/README.md
+
+# IoT build artifacts
+iot/arduino/build/
+iot/esp32/build/
+
+# Logs
+*.log
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# pytest
+.pytest_cache/
