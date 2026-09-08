@@ -1,5 +1,18 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Setup Instructions
+
+1. Ensure you have Node.js 22 LTS installed.
+2. Copy `.env.example` to `.env.local` and configure your variables:
+   ```bash
+   cp .env.example .env.local
+   ```
+   - `NEXT_PUBLIC_API_URL`: Points to your FastAPI backend (default: `http://localhost:8000`).
+   - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL.
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anon publishable key.
+
+3. Install dependencies:
+
 ## Getting Started
 
 First, run the development server:

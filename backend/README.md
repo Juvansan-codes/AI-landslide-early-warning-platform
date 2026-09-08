@@ -26,11 +26,27 @@ backend/
 └── README.md
 ```
 
-## Getting Started
+## Setup Instructions
 
-```bash
-python -m venv .venv
-.venv\Scripts\activate        # Windows
+### 1. Supabase Configuration
+
+This backend requires a connection to a Supabase project (PostgreSQL + PostGIS).
+
+1. Create a project at [Supabase](https://supabase.com).
+2. Apply the SQL migrations in `migrations/` via the Supabase SQL Editor.
+3. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+4. Fill in your credentials in `.env`:
+   - `SUPABASE_URL`: Your project URL.
+   - `SUPABASE_ANON_KEY`: Your publishable anon key.
+   - `SUPABASE_SERVICE_ROLE_KEY`: Your service role secret (found in Project Settings > API). **Never expose this key to the frontend.**
+
+### 2. Local Development
+
+1. Ensure you have Python 3.12+ installed.
+2. Create and activate a virtual environment:
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```

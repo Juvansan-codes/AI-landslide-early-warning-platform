@@ -17,6 +17,7 @@ Every AI assistant working on this project **must** adhere to this protocol:
 - [Entry 001: Project Initialization & Journaling System Setup](#entry-001--2026-09-07--project-initialization--journaling-system-setup)
 - [Entry 002: Initial Full-Stack Repository Scaffolding](#entry-002--2026-09-07--initial-full-stack-repository-scaffolding)
 - [Entry 003: Database Foundation (PostGIS & Supabase)](#entry-003--2026-09-07--database-foundation-postgis--supabase)
+- [Entry 004: Live Supabase Integration & Core API Foundation](#entry-004--2026-09-07--live-supabase-integration--core-api-foundation)
 
 ---
 
@@ -211,5 +212,51 @@ Every AI assistant working on this project **must** adhere to this protocol:
   - Configure `.env` with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
   - Validate live connectivity via backend health check endpoint.
   - Begin data ingestion modules (e.g., historical landslide data loading).
+
+---
+
+### Entry 004 — 2026-09-07 — Live Supabase Integration & Core API Foundation
+
+- **User Prompt**:
+  > *"Connect the backend to the actual Supabase project and establish the first verified end-to-end application data flow. Create foundational endpoints, frontend API layer, and verify the full architecture works (Next.js -> FastAPI -> Supabase PostgreSQL -> FastAPI -> Next.js)."*
+
+- **Objective**:
+  - Verify real database connectivity via the configured `.env` files.
+  - Create a new `/api/v1/system/status` endpoint to return live database statistics (like risk cell and sensor counts) using the Supabase Service Role client.
+  - Ensure the API gracefully handles missing credentials and errors without exposing sensitive information.
+  - Update the Next.js frontend to query this new endpoint and display the operational status of both the API and the Database.
+  - Add comprehensive tests for the new endpoint.
+
+- **AI Solution & Strategy**:
+  - Validated that the user successfully deployed the SQL migrations to their live Supabase instance using a temporary python test script. The connection returned successfully.
+  - Created `SystemStatusResponse` Pydantic schemas separating API health and Database status.
+  - Implemented the `GET /api/v1/system/status` endpoint in FastAPI. This endpoint executes a `count='exact'` query on the `risk_cells` and `sensors` tables, which is lightweight but proves the connection and permissions work end-to-end.
+  - Updated the Next.js `page.tsx` to display a rich dashboard UI utilizing `lucide-react` icons. The UI fetches from the new API and conditionally renders "Operational", "Connected", and table row counts.
+
+- **Files Created / Modified**:
+  - **Backend**:
+    - [`backend/app/schemas/system.py`](file:///d:/College%20Files/SIH'26/backend/app/schemas/system.py) [NEW]: Response schema for system status.
+    - [`backend/app/api/v1/endpoints/system.py`](file:///d:/College%20Files/SIH'26/backend/app/api/v1/endpoints/system.py) [NEW]: The core system status API endpoint.
+    - [`backend/app/api/v1/router.py`](file:///d:/College%20Files/SIH'26/backend/app/api/v1/router.py) [MODIFIED]: Included the `system` endpoint.
+    - [`backend/tests/test_system.py`](file:///d:/College%20Files/SIH'26/backend/tests/test_system.py) [NEW]: Unit tests using mocked Supabase clients.
+    - [`backend/README.md`](file:///d:/College%20Files/SIH'26/backend/README.md) [MODIFIED]: Documented Supabase setup instructions.
+  - **Frontend**:
+    - [`frontend/src/app/page.tsx`](file:///d:/College%20Files/SIH'26/frontend/src/app/page.tsx) [MODIFIED]: Updated the dashboard UI to fetch and render the live system status.
+    - [`frontend/README.md`](file:///d:/College%20Files/SIH'26/frontend/README.md) [MODIFIED]: Added API `.env` configuration documentation.
+  - **Root**:
+    - `.env`, `frontend/.env.local`, `backend/.env` [MODIFIED]: Configured with actual Supabase keys securely via local environment variables.
+
+- **Verification Results**:
+  - ✅ Temporary test script confirmed successful connection to the live Supabase instance via `get_supabase_client()`.
+  - ✅ `pytest tests/ -v` → 5/5 tests passed (including the 3 new system endpoint tests).
+  - ✅ ESLint `npm run lint` → 0 errors on the frontend Next.js codebase.
+
+- **Current Status**:
+  - The End-to-End architecture is fully operational! The Next.js frontend can communicate with the FastAPI backend, which securely reads from the Supabase PostGIS database using its service role credentials.
+  - API Versioning, CORS, Error Handling, and Logging are established.
+  
+- **Next Steps**:
+  - We can now focus on data pipelines or geospatial features.
+  - Suggested path: Setting up the MapLibre GL JS map on the dashboard to visualize the NER region, or implementing the script to ingest historical landslide data into the new Supabase schema.
 
 

@@ -7,8 +7,10 @@ that is included by the main application.
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints.health import router as health_router
+from app.api.v1.endpoints import health, system
 
 v1_router = APIRouter()
 
-v1_router.include_router(health_router, prefix="/health", tags=["Health"])
+# Include endpoint routers
+v1_router.include_router(health.router, prefix="/health", tags=["health"])
+v1_router.include_router(system.router, prefix="/system", tags=["system"])
